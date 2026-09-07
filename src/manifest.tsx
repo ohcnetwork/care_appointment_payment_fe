@@ -4,7 +4,7 @@ import "./componentOverrides";
 
 import { PatientRead } from "@/types/emr/patient/patient";
 import { BookAppointmentDetails as BookAppointmentPage } from "@/pages/Appointments/BookAppointment/BookAppointmentPage";
-import CreateEncounterPage from "@/pages/Encounters/CreateEncounterPage";
+import CreateInpatientEncounterPage from "@/pages/Encounters/CreateInpatientEncounterPage";
 import EncounterExternalIdentifierSettings from "@/pages/Facility/settings/EncounterExternalIdentifierSettings";
 
 interface NavigationLink {
@@ -50,7 +50,12 @@ const manifest: Manifest = {
     "/facility/:facilityId/patient/:patientId/encounter/create": ({
       facilityId,
       patientId,
-    }) => <CreateEncounterPage facilityId={facilityId} patientId={patientId} />,
+    }) => (
+      <CreateInpatientEncounterPage
+        facilityId={facilityId}
+        patientId={patientId}
+      />
+    ),
     "/facility/:facilityId/settings/encounter": ({ facilityId }) => (
       <EncounterExternalIdentifierSettings facilityId={facilityId} />
     ),

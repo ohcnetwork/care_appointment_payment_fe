@@ -29,6 +29,7 @@ import {
 } from "@/components/Billing/InvoiceChargeItemTitle";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import { InvoiceRead, InvoiceStatus } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
@@ -60,6 +61,15 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
   });
 
   const patient = invoice?.account.patient;
+
+  // Fetch full account data (invoice's account is minimal and lacks primary_encounter)
+  const { data: account } = useQuery({
+    queryKey: ["account", invoice?.account.id],
+    queryFn: query(accountApi.retrieveAccount, {
+      pathParams: { facilityId, accountId: invoice?.account.id ?? "" },
+    }),
+    enabled: !!invoice?.account.id,
+  });
 
   // Fetch patient data for identifiers
   const { data: verifiedPatient } = useQuery({
@@ -208,6 +218,15 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                     )}
                   </span>
                 </div>
+                {account?.primary_encounter?.encounter_class === "imp" &&
+                  account.primary_encounter.external_identifier && (
+                    <div className="mt-1 text-sm text-gray-700">
+                      <span>{t("ip_number")}: </span>
+                      <span className="ml-2 font-semibold">
+                        {account.primary_encounter.external_identifier}
+                      </span>
+                    </div>
+                  )}
               </div>
               <QRCodeSVG
                 value={invoice.account.patient.id}

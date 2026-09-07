@@ -37,16 +37,11 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import { COLOR_PALETTE } from "@/components/ui/multi-filter/utils/Utils";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/lib/utils";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
-import {
-  formatScheduleResourceName,
-  SchedulableResourceType,
-} from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 import { UserReadMinimal } from "@/types/user/user";
 import query from "@/Utils/request/query";
@@ -66,6 +61,12 @@ interface Props {
   onSelect: (users: UserReadMinimal[]) => void;
   facilityId: string;
   multiple?: boolean;
+  defaultShowAllOrgs?: boolean;
+  usersResolver?: (options: {
+    facilityId: string;
+    organizationIds?: string[];
+    signal: AbortSignal;
+  }) => Promise<{ users: UserReadMinimal[] }>;
 }
 
 const MULTI_SELECT_SHOW_LIMIT = 5;
@@ -75,6 +76,8 @@ export const PractitionerSelector = ({
   selected,
   onSelect,
   multiple = true,
+  defaultShowAllOrgs = false,
+  usersResolver,
 }: Props) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -85,7 +88,7 @@ export const PractitionerSelector = ({
   const [currentOrganizationId, setCurrentOrganizationId] = useState<
     string | null
   >(null);
-  const [showAllOrgs, setShowAllOrgs] = useState(false);
+  const [showAllOrgs, setShowAllOrgs] = useState(defaultShowAllOrgs);
   const isMobile = useBreakpoints({ default: true, sm: false });
 
   // Fetch root organizations - default to user's departments only
@@ -118,6 +121,14 @@ export const PractitionerSelector = ({
     useQuery({
       queryKey: ["organizationUsers", facilityId, currentOrganizationId],
       queryFn: async ({ signal }) => {
+        if (usersResolver) {
+          return usersResolver({
+            facilityId,
+            organizationIds: [currentOrganizationId!],
+            signal,
+          });
+        }
+
         // Try availableUsers API with organization filter first
         try {
           const response = await query(
@@ -148,17 +159,34 @@ export const PractitionerSelector = ({
 
   // Fetch all practitioners for search functionality
   const { data: allPractitioners } = useQuery({
-    queryKey: ["allPractitioners", facilityId, searchQuery, showAllOrgs],
-    queryFn: query(scheduleApi.appointments.availableUsers, {
-      pathParams: { facilityId },
-      queryParams: {
-        ...(showAllOrgs
-          ? {}
-          : {
-              organization_ids: organizations.map((org) => org.id).join(","),
-            }),
-      },
-    }),
+    queryKey: [
+      "allPractitioners",
+      facilityId,
+      searchQuery,
+      showAllOrgs,
+      usersResolver ? "custom" : "schedulable",
+    ],
+    queryFn: ({ signal }) =>
+      usersResolver
+        ? usersResolver({
+            facilityId,
+            organizationIds: showAllOrgs
+              ? undefined
+              : organizations.map((org) => org.id),
+            signal,
+          })
+        : query(scheduleApi.appointments.availableUsers, {
+            pathParams: { facilityId },
+            queryParams: {
+              ...(showAllOrgs
+                ? {}
+                : {
+                    organization_ids: organizations
+                      .map((org) => org.id)
+                      .join(","),
+                  }),
+            },
+          })({ signal }),
     select: (data: { users: UserReadMinimal[] }) =>
       data.users.filter((user) =>
         formatName(user).toLowerCase().includes(searchQuery.toLowerCase()),
@@ -274,19 +302,12 @@ export const PractitionerSelector = ({
     >
       {selected[0] ? (
         <div className="flex items-center gap-2">
-          <ScheduleResourceIcon
-            resource={{
-              resource_type: SchedulableResourceType.Practitioner,
-              resource: selected[0],
-            }}
+          <Avatar
+            imageUrl={selected[0].profile_picture_url}
+            name={formatName(selected[0], true)}
             className="size-6 rounded-full"
           />
-          <span>
-            {formatScheduleResourceName({
-              resource_type: SchedulableResourceType.Practitioner,
-              resource: selected[0],
-            })}
-          </span>
+          <span>{formatName(selected[0])}</span>
         </div>
       ) : (
         <span className="text-gray-400">{t("select_practitioner")}</span>
