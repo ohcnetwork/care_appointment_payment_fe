@@ -38,5 +38,7 @@
   "mark_as_balanced": "Mark as balanced",
   "total_payments_received": "Total payments received",
   "outstanding_balance": "Outstanding balance",
+  "no_payment_due_for_dispense": "No payment is due for this dispense.",
+  "settle_invoices_with_amount_due_before_completion": "Settle the invoices that still have an amount due before completing this dispense.",
   "location_is_required": "Location is required"
 }

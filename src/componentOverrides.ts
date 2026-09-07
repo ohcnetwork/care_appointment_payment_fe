@@ -9,6 +9,7 @@
  */
 import { BookAppointmentDetails } from "@/pages/Appointments/BookAppointment/BookAppointmentDetails";
 import { PaymentReconciliationSheet } from "@/pages/Facility/billing/PaymentReconciliationSheet";
+import { DispenseOrderViewFooter } from "@/pages/Facility/services/pharmacy/components/DispenseOrderViewFooter";
 import { defineComponentOverrides } from "@/lib/hostOverrides";
 import { PrintInvoice } from "@/components/Billing/PrintInvoice";
 
@@ -49,5 +50,10 @@ defineComponentOverrides({
     //       route,
     //     ),
     // },
+  },
+  DispenseOrderViewFooter: {
+    component: DispenseOrderViewFooter,
+    description:
+      "Also allows completing a dispense when the invoice has no amount due, not just when it is balanced.",
   },
 });
