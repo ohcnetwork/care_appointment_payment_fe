@@ -1,4 +1,5 @@
 {
+  "ip_number": "IP Number",
   "invoice_creation_failed": "Invoice creation failed",
   "proceed_to_billing": "Proceed to Billing",
   "more_options": "More options",
@@ -30,5 +31,14 @@
   "saved_successfully": "Saved successfully",
   "error": "An error occurred. Please try again.",
   "enabled_encounter_classes": "Enabled Encounter Classes",
-  "patient_has_open_account": "Patient has an open account"
+  "patient_has_open_account": "Patient has an open account",
+  "invoice_has_no_dues": "Invoice has no dues",
+  "invoice_marked_as_balanced": "Invoice marked as balanced",
+  "failed_to_mark_invoice_as_balanced": "Failed to mark invoice as balanced",
+  "mark_as_balanced": "Mark as balanced",
+  "total_payments_received": "Total payments received",
+  "outstanding_balance": "Outstanding balance",
+  "no_payment_due_for_dispense": "No payment is due for this dispense.",
+  "settle_invoices_with_amount_due_before_completion": "Settle the invoices that still have an amount due before completing this dispense.",
+  "location_is_required": "Location is required"
 }

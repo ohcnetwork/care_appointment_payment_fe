@@ -1,4 +1,3 @@
-import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import React from "react";
 
 import { cn } from "@/lib/utils";
@@ -43,7 +42,7 @@ function Avatar({
   imageUrl,
   className,
   ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Root> & {
+}: React.HTMLAttributes<HTMLDivElement> & {
   colors?: [string, string];
   name: string;
   imageUrl?: string;
@@ -60,55 +59,56 @@ function Avatar({
   const shouldShowFallback = !imageUrl || hasImageError;
 
   return (
-    <AvatarPrimitive.Root
+    <div
       data-slot="avatar"
-      className={cn("aspect-square size-full rounded-md", className)}
+      className={cn(
+        "relative aspect-square size-full overflow-hidden rounded-md",
+        className,
+      )}
       style={{
         background: bgColor,
       }}
       {...props}
     >
-      <AvatarPrimitive.Image
-        data-slot="avatar-image"
-        src={imageUrl}
-        alt={name}
-        className={cn(
-          "aspect-square size-full object-cover rounded-md",
-          className,
-        )}
-        onLoadingStatusChange={(status) => {
-          if (status === "error") setHasImageError(true);
-          if (status === "loaded") setHasImageError(false);
-        }}
-      />
-      <AvatarPrimitive.Fallback
+      {imageUrl && !hasImageError && (
+        <img
+          data-slot="avatar-image"
+          src={imageUrl}
+          alt={name}
+          className="aspect-square size-full rounded-md object-cover"
+          onError={() => setHasImageError(true)}
+          onLoad={() => setHasImageError(false)}
+        />
+      )}
+      <div
         data-slot="avatar-fallback"
-        className="flex h-full w-full select-none items-center justify-center text-center"
-      >
-        {shouldShowFallback && (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            version="1.1"
-            viewBox="0 0 100 100"
-            className="aspect-square h-full w-full object-cover"
-          >
-            <text
-              fill={textColor}
-              fillOpacity="0.5"
-              fontSize="50"
-              fontWeight="900"
-              x="50"
-              y="54"
-              textAnchor="middle"
-              dominantBaseline="middle"
-              alignmentBaseline="middle"
-            >
-              {avatarText ? initials(avatarText) : null}
-            </text>
-          </svg>
+        className={cn(
+          "absolute inset-0 flex h-full w-full select-none items-center justify-center text-center",
+          !shouldShowFallback && "hidden",
         )}
-      </AvatarPrimitive.Fallback>
-    </AvatarPrimitive.Root>
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          version="1.1"
+          viewBox="0 0 100 100"
+          className="aspect-square h-full w-full object-cover"
+        >
+          <text
+            fill={textColor}
+            fillOpacity="0.5"
+            fontSize="50"
+            fontWeight="900"
+            x="50"
+            y="54"
+            textAnchor="middle"
+            dominantBaseline="middle"
+            alignmentBaseline="middle"
+          >
+            {avatarText ? initials(avatarText) : null}
+          </text>
+        </svg>
+      </div>
+    </div>
   );
 }
 

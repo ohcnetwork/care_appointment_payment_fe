@@ -19,6 +19,8 @@ import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/Appo
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import scheduleApi from "@/types/scheduling/scheduleApi";
+import { KeyboardShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { formatKeyboardShortcut } from "@/Utils/keyboardShortcutUtils";
 import mutate from "@/Utils/request/mutate";
 
 import { ScheduleResourceFormState } from "@/components/Schedule/ResourceSelector";
@@ -196,8 +198,13 @@ const BookAppointmentDetailsBase = ({
                 onClick={handleProceedToBilling}
                 type="submit"
                 disabled={isCreating}
+                data-shortcut-id="enter-action"
               >
                 {t("proceed_to_billing", { ns: "care_appointment_plug" })}
+                <KeyboardShortcutBadge
+                  shortcut={formatKeyboardShortcut("enter")}
+                  className="ml-1"
+                />
               </Button>
             </div>
           </div>

@@ -11,6 +11,7 @@ import Decimal from "decimal.js";
 type CountryCode = string;
 
 const env = import.meta.env;
+const coreEnv = typeof window !== "undefined" ? window.__CORE_ENV__ : undefined;
 
 interface ILogo {
   light: string;
@@ -48,6 +49,21 @@ const resolveApiUrl = (): string => {
     if (mappedUrl) return mappedUrl;
   }
   return env.REACT_CARE_API_URL ?? "";
+};
+
+const resolveDefaultPaymentMethod = () => {
+  const method = coreEnv?.defaultPaymentMethod;
+  if (!method) return undefined;
+
+  const validMethods = Object.values(PaymentReconciliationPaymentMethod);
+  if (validMethods.includes(method as PaymentReconciliationPaymentMethod)) {
+    return method as PaymentReconciliationPaymentMethod;
+  }
+
+  console.warn(
+    `Invalid default payment method: "${method}". Valid values are: ${validMethods.join(", ")}`,
+  );
+  return undefined;
 };
 
 const careConfig = {
@@ -143,30 +159,13 @@ const careConfig = {
   /**
    * Flag to make location field mandatory for payment reconciliation
    */
-  paymentLocationRequired: booleanFromString(
-    env.REACT_PAYMENT_LOCATION_REQUIRED,
-    true,
-  ),
+  paymentLocationRequired: coreEnv?.paymentLocationRequired ?? true,
 
   /**
    * Default payment method to preselect when recording a new payment
    * Valid values: cash, ccca, cchk, cdac, chck, ddpo, debc
    */
-  defaultPaymentMethod: (() => {
-    const method = env.REACT_DEFAULT_PAYMENT_METHOD;
-    if (!method) return undefined;
-
-    // Validate the payment method value
-    const validMethods = Object.values(PaymentReconciliationPaymentMethod);
-    if (validMethods.includes(method as PaymentReconciliationPaymentMethod)) {
-      return method as PaymentReconciliationPaymentMethod;
-    }
-
-    console.warn(
-      `Invalid REACT_DEFAULT_PAYMENT_METHOD: "${method}". Valid values are: ${validMethods.join(", ")}`,
-    );
-    return undefined;
-  })(),
+  defaultPaymentMethod: resolveDefaultPaymentMethod(),
 
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app: string) => {

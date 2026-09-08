@@ -63,6 +63,21 @@ function SheetContent({
         data-slot="sheet-content"
         className={cn(sheetVariants({ side }), className)}
         {...props}
+        onCloseAutoFocus={(e) => {
+          // This plugin runs a separate copy of @radix-ui/react-dialog from
+          // the host (core_fe) because Radix is not listed in the federation
+          // `shared` config. Each copy independently saves/restores
+          // `body.style.pointerEvents`. When the sheet opens while a HOST
+          // Radix component (e.g. a DropdownMenu) is still playing its close
+          // animation, the HOST has already set body = "none". The PLUGIN's
+          // DismissableLayer opens with an empty counter, saves "none" as the
+          // "original value to restore", then when the sheet closes it
+          // restores "none" — leaving the page unclickable.
+          // Clearing it here on every close fixes the bad restore.
+          // https://github.com/radix-ui/primitives/issues/1241
+          e.preventDefault();
+          document.body.style.pointerEvents = "";
+        }}
       >
         <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-gray-100 dark:ring-offset-gray-950 dark:focus:ring-gray-300 dark:data-[state=open]:bg-gray-800">
           <Cross2Icon className="size-4" />

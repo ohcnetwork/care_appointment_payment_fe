@@ -8,6 +8,8 @@
  * Imported for side-effects from `manifest.tsx`.
  */
 import { BookAppointmentDetails } from "@/pages/Appointments/BookAppointment/BookAppointmentDetails";
+import { PaymentReconciliationSheet } from "@/pages/Facility/billing/PaymentReconciliationSheet";
+import { DispenseOrderViewFooter } from "@/pages/Facility/services/pharmacy/components/DispenseOrderViewFooter";
 import { defineComponentOverrides } from "@/lib/hostOverrides";
 import { PrintInvoice } from "@/components/Billing/PrintInvoice";
 
@@ -32,5 +34,26 @@ defineComponentOverrides({
         typeof route === "string" &&
         /^(\/facility\/[^/]+)?\/patient(s\/home|\/[^/]+)/.test(route),
     },
+  },
+  PaymentReconciliationSheet: {
+    component: PaymentReconciliationSheet,
+    description:
+      "Overrides the host's PaymentReconciliationSheet with a version that supports reconciling payments for appointments.",
+    // Scope to the route that mounts `PaymentReconciliationSheet` today:
+    //   - FacilityBilling: /facility/:facilityId/billing/reconcile-payments
+    // Anywhere else, the override is skipped and the host's base
+    // component renders.
+    // condition: {
+    //   custom: ({ route }) =>
+    //     typeof route === "string" &&
+    //     /^\/facility\/[^/]+\/billing\/invoices\/[^/]+\/pay\?sourceUrl=[^/]+appointment[^/]+/.test(
+    //       route,
+    //     ),
+    // },
+  },
+  DispenseOrderViewFooter: {
+    component: DispenseOrderViewFooter,
+    description:
+      "Also allows completing a dispense when the invoice has no amount due, not just when it is balanced.",
   },
 });
